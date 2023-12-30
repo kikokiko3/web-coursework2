@@ -1,0 +1,294 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="theme-color" content="#e90101"/>
+<title>CineExplorer | Online Movie Review</title>
+<meta name="author" content="Jinlin Li">
+<meta name="description" content="For all kind of movie review">
+<meta name="keywords" content="CineExplorer, video, movie, show, tv, watch, online, ads, trailer, imdb, dram, action, hollywood, cinema, rate">
+<link rel="icon" href="{{ url_for('static', filename='images/avatar.jpg') }}" type="image/x-icon">
+     
+<!-- CSS FILES -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/lineicons.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fancybox.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/swiper.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script src="{{ url_for('static', filename='js/addlike.js') }}"></script>
+<script type="text/javascript">  var toggleLikeUrl = "{{ url_for('toggle_like') }}";</script>
+</head>
+<body>
+  <nav class="mobile-menu">
+		<div class="inner">
+      {% if 'user_id' in session %}
+    <a class="my_button-account"><i class="lni lni-user"></i>{{ session['username']}}</a>    
+    {% else %}
+    <a href="{{ url_for('login_page') }}" class="my_button-account"><i class="lni lni-user"></i> LOGIN </a>    
+    {% endif %}
+    <!-- end button-account --> 
+	<div class="site-menu">
+    <ul>
+      <li><a href="{{ url_for('index') }}">HOME</a></li>
+      <li><a href="{{ url_for('movies_page') }}">MOVIES</a></li>
+      <li><a href="{{ url_for('movie_like_page') }}">MOVIE LIKE</a></li>
+      <li><a href="{{ url_for('movie_manage') }}">MANAGE</a></li>
+    </ul>
+  </div>
+  <!-- end site-menu -->
+			</div>
+		<!-- end inner -->
+	</nav>
+	<!-- end mobile-menu -->
+<nav class="navbar">
+  <div class="logo"> <a href="{{ url_for('index') }}"> <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Image"> </a> </div>
+  <!-- end logo -->
+  <div class="site-menu">
+    <ul>
+      <li><a href="{{ url_for('index') }}">HOME</a></li>
+      <li><a href="{{ url_for('movies_page') }}">MOVIES</a></li>
+      <li><a href="{{ url_for('movie_like_page') }}">MOVIE LIKE</a></li>
+      <li><a href="{{ url_for('movie_manage') }}">MANAGE</a></li>
+    </ul>
+  </div>
+  <!-- end site-menu -->
+    <div class="navbar-account"> <a href="{{ url_for('login_page') }}">ACCOUNT <i class="lni lni-user"></i> </a></div>
+    <!-- end navbar-account --> 
+  </div>
+  <!-- end user-menu --> 
+      <div class="hamburger-menu">
+        <button class="hamburger">
+        <svg width="45" height="45" viewBox="0 0 100 100">
+          <path class="line line1" d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058" />
+          <path class="line line2" d="M 20,50 H 80" />
+          <path class="line line3" d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942" />
+        </svg>
+        </button>
+      </div>
+      <!-- end hamburger-menu --> 
+</nav>
+<!-- end navbar -->
+<header class="page-header">
+	<div class="container">
+	<h1>{{ movie.title }}</h1>
+	</div>
+	</header>
+<!-- end page-header -->
+<main>
+	<section class="content-section" data-background="#ffffff">
+	<div class="container">
+      <div class="row">
+		<div class="col-lg-8">
+      <a href="{{ url_for('movies_page') }}" class="back-btn"><i class="lni lni-chevron-left"></i> BACK</a>
+			<div class="movie-info-box">
+            <h2 class="name">{{ movie.title }} <br>
+              <strong>MORE DETATLS:</strong></h2>
+            <ul class="features">
+              <li>
+                <div class="rate">
+                  <svg class="circle-chart" viewBox="0 0 30 30" width="40" height="40" fill="transparent"  xmlns="http://www.w3.org/2000/svg">
+                    <circle class="circle-chart__background" stroke="#eee" stroke-width="2" fill="none" cx="15" cy="15" r="14"></circle>
+                    <circle class="circle-chart__circle" stroke="#4eb04b" stroke-width="2" stroke-dasharray="{{ movie.score_100 }},100" cx="15" cy="15" r="14"></circle>
+                  </svg>
+                  <b>{{ movie.score }}</b> IMDB SCORE </div>
+                <!-- end rate --> 
+              </li>
+              <li>
+                <div class="year">{{ movie.year }}</div>
+              </li>
+              <li>
+                <div class="hd">{{ movie.runtime }} <b>HD</b></div>
+              </li>
+              <li>
+                <div class="tags">{{ movie.tag }}</div>
+              </li>
+            </ul>
+            <p class="description">{{ movie.overview }}</p>
+            <a href="javascript:void(0);" id="like-btn-{{ movie.id }}" class="add-btn {{ 'added' if user_liked }}" onclick="toggleLike('{{ movie.id }}')">
+              {% if user_liked %}
+                  &#10004; ADDED TO LIST
+              {% else %}
+                  + ADD YOUR LIST
+              {% endif %}
+          </a>          
+      <div class="rate-box">
+        <strong>Then you could found it in MOVIE LIKE</strong></div>
+      </div>
+			<!-- end movie-info-box -->
+		  </div>
+		  <!-- end col-8 -->
+		  <div class="col-lg-4">
+		  	<div class="movie-side-info-box">
+				<figure><img src="{{ movie.post }}" alt="Image"></figure>
+			 <ul>
+				<li><strong>Certificate: </strong> <b class="my_certificate">{{ movie.certificate }}</b></li>
+<li><strong>Director:</strong> {{ movie.director }}</li>
+<li><strong>Star:</strong> {{ movie.star }}</li>
+				 </ul>
+			  </div>
+			  <!-- end movie-side-info-box -->
+		  </div>
+		  <!-- end col-4 -->
+		</div>
+		<!-- end col-12 -->
+      <!-- end row --> 
+    </div>
+    <!-- end container --> 
+	</section>
+	<!-- end content-section -->
+	<section class="content-section" data-background="#111111">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <div class="section-title light">
+            <h6>FIND ANYWHERE ELSE</h6>
+            <h2>Related Movies</h2>
+          </div>
+          <!-- end section-title --> 
+        </div>
+        <!-- end col-12 -->
+        {% for related_movie in related_movies %}
+        <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-6">
+          <div class="video-thumb light">
+            <figure class="video-image"> <img src="{{ related_movie.post }}" alt="Image">
+              <div class="circle-rate">
+                <svg class="circle-chart" viewBox="0 0 30 30" width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+                  <circle class="circle-chart__background" stroke="#2f3439" stroke-width="2" fill="none" cx="15" cy="15" r="14"></circle>
+                  <circle class="circle-chart__circle" stroke="#4eb04b" stroke-width="2" stroke-dasharray="{{ related_movie.score_100 }},100" cx="15" cy="15" r="14"></circle>
+                </svg>
+                <b>{{ related_movie.score }}</b> </div>
+              <!-- end circle-rate -->
+              <div class="hd">{{ related_movie.runtime }} <b>HD</b></div>
+              <!-- end hd --> 
+            </figure>
+            <div class="video-content"> 
+              <ul class="tags">
+                <li>{{ related_movie.tag }}</li>
+              </ul>
+              <div class="age">{{ related_movie.certificate }}</div>
+              <!-- end age -->
+              <h3 class="name"><a href="{{ url_for('movie_single_page', movie_id=related_movie.id) }}">{{ related_movie.title }}</a></h3>
+            </div>
+            <!-- end video-content --> 
+          </div>
+          <!-- end video-thumb --> 
+        </div>
+        <!-- end col-2 -->
+        {% endfor %}
+      </div>
+      <!-- end row --> 
+    </div>
+    <!-- end container --> 
+  </section>
+  <!-- end content-section -->
+	<section class="content-section" data-background="#ffffff">
+	<div class="container">
+	<div class="row">
+		<div class="col-12">
+		<div class="section-title">
+			  <h6>SHARE WITH US</h6>
+            <h2>All Comments</h2>
+          </div>
+			<!-- end section-title -->
+		</div>
+<!-- end col-12 --> 
+		<div class="col-12">
+			<div class="comments">
+        <ul class="comments-list">
+          {% for comment in comments %}
+              <li>
+                  <figure class="avatar"><img src="{{ url_for('static', filename='images/avatar01.jpg') }}" alt="Avatar"></figure>
+                  <div class="comment">
+                      <h6>{{ comment.user.username }}</h6>
+                      <p>{{ comment.content }}</p>
+                  </div>
+              </li>
+          {% endfor %}
+      </ul>
+      
+        <div class="comments-form">
+          <h5>Leave a Reply</h5>
+          <form action="{{ url_for('add_comment') }}" method="post">
+              <input type="hidden" name="movie_id" value="{{ movie.id }}">
+              <div class="form-group">
+                  <textarea name="content" placeholder="Comment"></textarea>
+              </div>
+              <div class="form-group">
+                  <input type="submit" value="Post Comment">
+              </div>
+          </form>
+      </div>
+      
+				<!-- end comments-form -->
+			</div>
+			<!-- end comments -->
+		</div>
+		<!-- end col-12 -->
+      </div>
+      <!-- end row --> 
+    </div>
+    <!-- end container --> 
+  </section>
+  <!-- end content-section -->	
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4">
+          <h5 class="call-us">Questions? <strong>Call 137-8555-2599</strong></h5>
+          <h5> You can use the CineExplorer website to view a large number of movie information and reviews. If you have a problem or find an error, we would love to receive your feedback.</h5>
+        </div>
+        <!-- end col-4 -->
+        <div class="col-lg-2 offset-lg-1 col-md-4">
+          <h6 class="widget-title">CINEEXPLORER</h6>
+          <ul class="footer-menu">
+            <li><a href="#">CineExplorer</a></li>
+            <li><a href="#">Devices</a></li>
+            <li><a href="#">Tips</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+        <!-- end col-4 -->
+        <div class="col-lg-2 col-md-4">
+          <h6 class="widget-title">SUPPORT</h6>
+          <ul class="footer-menu">
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Account</a></li>
+            <li><a href="#">Support <i class="lni lni-question-circle"></i></a></li>
+            <li><a href="#">Media Center</a></li>
+          </ul>
+        </div>
+        <!-- end col-4 -->
+        <div class="col-lg-2 col-md-4">
+          <h6 class="widget-title">POLICIES</h6>
+          <ul class="footer-menu">
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms & Agreement</a></li>
+            <li><a href="#">Legal Notices</a></li>
+          </ul>
+        </div>
+        <!-- end col-4 --> 
+      </div>
+      <!-- end row --> 
+    </div>
+    <!-- end container -->
+    <div class="bottom-bar">
+      <div class="container"> <span>© 2023 CineExplorer | Online Movie Review</span> <span>Site create by Jinlin Li</span> </div>
+      <!-- end container --> 
+    </div>
+    <!-- end bottom-bar --> 
+  </footer>
+  <!-- end footer --> 
+</main>
+
+<!-- JS FILES --> 
+
+<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script> 
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script> 
+<script src="{{ url_for('static', filename='js/swiper.min.js') }}"></script> 
+<script src="{{ url_for('static', filename='js/fancybox.min.js') }}"></script> 
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+
+</body>
+</html>

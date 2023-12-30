@@ -1,0 +1,412 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="theme-color" content="#e90101"/>
+<title>CineExplorer | Online Movie Review</title>
+<meta name="author" content="Jinlin Li">
+<meta name="description" content="For all kind of movie review">
+<meta name="keywords" content="CineExplorer, video, movie, show, tv, watch, online, ads, trailer, imdb, dram, action, hollywood, cinema, rate">
+<meta name="urls" data-delete-url="{{ url_for('delete_movie', movie_id='0') }}">
+<meta name="urls1" data-delete-user-url="{{ url_for('delete_user', user_id='0') }}">
+<meta name="urls2" data-delete-comment-url="{{ url_for('delete_comment', comment_id='0') }}">
+<link rel="icon" href="{{ url_for('static', filename='images/avatar.jpg') }}" type="image/x-icon">
+
+<!-- CSS FILES -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/lineicons.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/fancybox.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/swiper.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+<body>
+  <nav class="mobile-menu">
+		<div class="inner">
+      {% if 'user_id' in session %}
+    <a class="my_button-account"><i class="lni lni-user"></i>{{ session['username']}}</a>    
+    {% else %}
+    <a href="{{ url_for('login_page') }}" class="my_button-account"><i class="lni lni-user"></i> LOGIN </a>    
+    {% endif %}
+    <!-- end button-account --> 
+	<div class="site-menu">
+    <ul>
+      <li><a href="{{ url_for('index') }}">HOME</a></li>
+      <li><a href="{{ url_for('movies_page') }}">MOVIES</a></li>
+      <li><a href="{{ url_for('movie_like_page') }}">MOVIE LIKE</a></li>
+      <li><a href="{{ url_for('movie_manage') }}">MANAGE</a></li>
+    </ul>
+  </div>
+  <!-- end site-menu -->
+			</div>
+		<!-- end inner -->
+	</nav>
+	<!-- end mobile-menu -->
+<nav class="navbar">
+  <div class="logo"> <a href="{{ url_for('index') }}"> <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Image"> </a> </div>
+  <!-- end logo -->
+  <div class="site-menu">
+    <ul>
+      <li><a href="{{ url_for('index') }}">HOME</a></li>
+      <li><a href="{{ url_for('movies_page') }}">MOVIES</a></li>
+      <li><a href="{{ url_for('movie_like_page') }}">MOVIE LIKE</a></li>
+      <li><a href="{{ url_for('movie_manage') }}">MANAGE</a></li>
+    </ul>
+  </div>
+  <!-- end site-menu -->
+    <div class="navbar-account"> <a href="{{ url_for('login_page') }}">ACCOUNT <i class="lni lni-user"></i> </a></div>
+    <!-- end navbar-account --> 
+  </div>
+  <!-- end user-menu --> 
+      <div class="hamburger-menu">
+        <button class="hamburger">
+        <svg width="45" height="45" viewBox="0 0 100 100">
+          <path class="line line1" d="M 20,29.000046 H 80.000231 C 80.000231,29.000046 94.498839,28.817352 94.532987,66.711331 94.543142,77.980673 90.966081,81.670246 85.259173,81.668997 79.552261,81.667751 75.000211,74.999942 75.000211,74.999942 L 25.000021,25.000058" />
+          <path class="line line2" d="M 20,50 H 80" />
+          <path class="line line3" d="M 20,70.999954 H 80.000231 C 80.000231,70.999954 94.498839,71.182648 94.532987,33.288669 94.543142,22.019327 90.966081,18.329754 85.259173,18.331003 79.552261,18.332249 75.000211,25.000058 75.000211,25.000058 L 25.000021,74.999942" />
+        </svg>
+        </button>
+      </div>
+      <!-- end hamburger-menu --> 
+</nav>
+<!-- end navbar -->
+
+<header class="page-header">
+	<div class="container">
+	<h1>Manage CineExplorer</h1>
+	</div>
+	</header>
+<!-- end page-header -->
+<main>
+  <section class="my_content-section" data-background="#111111">
+  <!-- 标签导航栏 -->
+  <div class="tag-sidebar">
+    <a class="tag-item" data-target="#system-log">System Log</a>
+    <a class="tag-item" data-target="#add-movie">Add Movie</a>
+    <a class="tag-item" data-target="#manage-movie">Manage Movie</a>
+    <a class="tag-item" data-target="#manage-account">Manage Account</a>
+    <a class="tag-item" data-target="#manage-comment">Manage Comment</a>
+</div>
+  <div class="container">
+    <div class="row">
+      <div id="system-log" class="content-area col-12" style="display: none;">
+        <table class="system-logs-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>User ID</th>
+                    <th>Action</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.timestamp }}</td>
+                    <td>{{ log.user_id }}</td>
+                    <td>{{ log.action }}</td>
+                    <td>{{ log.details }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="my_manage_pagination">
+          {% if logs.has_prev %}
+              <a href="{{ url_for('movie_manage', log_page=logs.prev_num, movie_page=movies.page, user_page=users.page, comment_page=comments.page, active_tab='system-log') }}">Previous</a>
+          {% endif %}
+          {% for page_num in logs.iter_pages() %}
+              {% if page_num %}
+                  {% if page_num != logs.page %}
+                      <a href="{{ url_for('movie_manage', log_page=page_num, movie_page=movies.page, user_page=users.page, comment_page=comments.page, active_tab='system-log') }}">{{ page_num }}</a>
+                  {% else %}
+                      <strong>{{ page_num }}</strong>
+                  {% endif %}
+              {% endif %}
+          {% endfor %}
+          {% if logs.has_next %}
+              <a href="{{ url_for('movie_manage', log_page=logs.next_num, movie_page=movies.page, user_page=users.page, comment_page=comments.page, active_tab='system-log') }}">Next</a>
+          {% endif %}
+        </div>        
+      </div>
+      
+      <div id="add-movie" class="content-area col-12 my_add_movie" style="display: none;">
+        <div class="col-12 ">
+        <div class="card input-data input-data-excel my_add_movie_excel">
+            <div class="card-body">
+                <h5 class="card-title">Upload Movies from Excel</h5>
+                <form id="excel-upload-form" action="/upload_movie_from_excel" method="post" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <input type="file" class="form-control" id="excelUpload" name="excelUpload" accept=".xls,.xlsx" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary my-right">Upload</button>
+                </form>
+            </div>
+        </div>
+        </div>
+        <div id="add-movie-form-container" class="my_add_movie">
+          <form id="add-movie-form" method="post">
+            <h5> Or Upload Single Movie from Form</h5>
+              <div class="row">
+                  <!-- Left Column -->
+                  <div class="col-md-6">
+                      <div class="form-group">
+                          <label for="post"><strong>Poster URL</strong></label>
+                          <input type="text" class="form-control" id="post" name="post" required>
+                      </div>
+                      <div class="form-group">
+                          <label for="title"><strong>Title</strong></label>
+                          <input type="text" class="form-control" id="title" name="title" required>
+                      </div>
+                      <div class="form-group">
+                          <label for="year"><strong>Year</strong></label>
+                          <input type="number" class="form-control" id="year" name="year" required>
+                      </div>
+                      <div class="form-group">
+                          <label for="certificate"><strong>Certificate</strong></label>
+                          <input type="text" class="form-control" id="certificate" name="certificate" required>
+                      </div>
+                      <div class="form-group">
+                          <label for="runtime"><strong>Runtime</strong></label>
+                          <input type="text" class="form-control" id="runtime" name="runtime" required>
+                      </div>
+                  </div>
+      
+                  <!-- Right Column -->
+                  <div class="col-md-6">
+                      <div class="form-group">
+                          <label for="tag"><strong>Tag</strong></label>
+                          <input type="text" class="form-control" id="tag" name="tag" required>
+                      </div>
+                      <div class="form-group">
+                          <label for="score"><strong>Score</strong></label>
+                          <input type="number" step="0.1" class="form-control" id="score" name="score"> required
+                      </div>
+                      <div class="form-group">
+                          <label for="overview"><strong>Overview</strong></label>
+                          <textarea class="form-control" id="overview" name="overview"></textarea>
+                      </div>
+                      <div class="form-group">
+                          <label for="director"><strong>Director</strong></label>
+                          <input type="text" class="form-control" id="director" name="director" required>
+                      </div>
+                      <div class="form-group">
+                          <label for="star"><strong>Star</strong></label>
+                          <input type="text" class="form-control" id="star" name="star" required>
+                      </div>
+                  </div>
+              </div>
+              <button type="submit" class="btn btn-primary">Add Movie</button>
+          </form>
+      </div>
+      
+      </div>
+
+      <div id="manage-movie" class="content-area col-12" style="display: none;">        
+        <table class="manage-movies-table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Year</th>
+                <th>Runtime</th>
+                <th>Tag</th>
+                <th>Score</th>
+                <th>Function</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movie in movies %}
+            <tr id="movie-{{ movie.id }}">
+                <td>{{ movie.title }}</td>
+                <td>{{ movie.year }}</td>
+                <td>{{ movie.runtime }}</td>
+                <td>{{ movie.tag }}</td>
+                <td>{{ movie.score }}</td>
+                <td>
+                  <button data-id="{{ movie.id }}" onclick="deleteMovie(this)" class="btn btn-danger">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="my_manage_pagination">
+      {% if movies.has_prev %}
+          <a href="{{ url_for('movie_manage', movie_page=movies.prev_num, user_page=users.page, comment_page=comments.page, log_page=logs.page, active_tab='manage-movie') }}">Previous</a>
+      {% endif %}
+      {% for page_num in movies.iter_pages() %}
+          {% if page_num %}
+              {% if page_num != movies.page %}
+                  <a href="{{ url_for('movie_manage', movie_page=page_num, user_page=users.page, comment_page=comments.page, log_page=logs.page, active_tab='manage-movie') }}">{{ page_num }}</a>
+              {% else %}
+                  <strong>{{ page_num }}</strong>
+              {% endif %}
+          {% endif %}
+      {% endfor %}
+      {% if movies.has_next %}
+          <a href="{{ url_for('movie_manage', movie_page=movies.next_num, user_page=users.page, comment_page=comments.page, log_page=logs.page, active_tab='manage-movie') }}">Next</a>
+      {% endif %}
+    </div>    
+      </div>
+
+      <div id="manage-account" class="content-area col-12" style="display: none;">
+        <table class="manage-user-table">
+          <thead>
+              <tr>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Function</th>
+              </tr>
+          </thead>
+          <tbody>
+            {% for user in users %}
+            <tr id="user-{{ user.id }}">
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    <button data-id="{{ user.id }}" onclick="deleteUser(this)" class="btn btn-danger">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+      </table>
+      <div class="my_manage_pagination">
+        {% if users.has_prev %}
+            <a href="{{ url_for('movie_manage', user_page=users.prev_num, movie_page=movies.page, comment_page=comments.page, log_page=logs.page, active_tab='manage-account') }}">Previous</a>
+        {% endif %}
+        {% for page_num in users.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != users.page %}
+                    <a href="{{ url_for('movie_manage', user_page=page_num, movie_page=movies.page, comment_page=comments.page, log_page=logs.page, active_tab='manage-account') }}">{{ page_num }}</a>
+                {% else %}
+                    <strong>{{ page_num }}</strong>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% if users.has_next %}
+            <a href="{{ url_for('movie_manage', user_page=users.next_num, movie_page=movies.page, comment_page=comments.page, log_page=logs.page, active_tab='manage-account') }}">Next</a>
+        {% endif %}
+      </div>
+          
+      </div>
+
+      <div id="manage-comment" class="content-area col-12" style="display: none;">
+        <table class="manage-comment-table">
+          <thead>
+              <tr>
+                  <th>Content</th>
+                  <th>User ID</th>
+                  <th>Movie ID</th>
+                  <th>Function</th>
+              </tr>
+          </thead>
+          <tbody>
+            {% for comment in comments %}
+            <tr id="comment-{{ comment.id }}">
+              <td>{{ comment.content }}</td>
+              <td>{{ comment.user_id }}</td>
+              <td>{{ comment.movie_id }}</td>
+                <td>
+                  <button data-id="{{ comment.id }}" onclick="deleteComment(this)" class="btn btn-danger">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+      </table>
+      <div class="my_manage_pagination">
+        {% if comments.has_prev %}
+            <a href="{{ url_for('movie_manage', comment_page=comments.prev_num, movie_page=movies.page, user_page=users.page, log_page=logs.page, active_tab='manage-comment') }}">Previous</a>
+        {% endif %}
+        {% for page_num in comments.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != comments.page %}
+                    <a href="{{ url_for('movie_manage', comment_page=page_num, movie_page=movies.page, user_page=users.page, log_page=logs.page, active_tab='manage-comment') }}">{{ page_num }}</a>
+                {% else %}
+                    <strong>{{ page_num }}</strong>
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% if comments.has_next %}
+            <a href="{{ url_for('movie_manage', comment_page=comments.next_num, movie_page=movies.page, user_page=users.page, log_page=logs.page, active_tab='manage-comment') }}">Next</a>
+        {% endif %}
+      </div>           
+      </div>
+</div>
+</div>
+</section>
+  <!-- end content-section -->
+  <footer class="footer">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-4">
+          <h5 class="call-us">Questions? <strong>Call 137-8555-2599</strong></h5>
+          <h5> You can use the CineExplorer website to view a large number of movie information and reviews. If you have a problem or find an error, we would love to receive your feedback.</h5>
+        </div>
+        <!-- end col-4 -->
+        <div class="col-lg-2 offset-lg-1 col-md-4">
+          <h6 class="widget-title">CINEEXPLORER</h6>
+          <ul class="footer-menu">
+            <li><a href="#">CineExplorer</a></li>
+            <li><a href="#">Devices</a></li>
+            <li><a href="#">Tips</a></li>
+            <li><a href="#">Contact</a></li>
+          </ul>
+        </div>
+        <!-- end col-4 -->
+        <div class="col-lg-2 col-md-4">
+          <h6 class="widget-title">SUPPORT</h6>
+          <ul class="footer-menu">
+            <li><a href="#">FAQ</a></li>
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Account</a></li>
+            <li><a href="#">Support <i class="lni lni-question-circle"></i></a></li>
+            <li><a href="#">Media Center</a></li>
+          </ul>
+        </div>
+        <!-- end col-4 -->
+        <div class="col-lg-2 col-md-4">
+          <h6 class="widget-title">POLICIES</h6>
+          <ul class="footer-menu">
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms & Agreement</a></li>
+            <li><a href="#">Legal Notices</a></li>
+          </ul>
+        </div>
+        <!-- end col-4 --> 
+      </div>
+      <!-- end row --> 
+    </div>
+    <!-- end container -->
+    <div class="bottom-bar">
+      <div class="container"> <span>© 2023 CineExplorer | Online Movie Review</span> <span>Site create by Jinlin Li</span> </div>
+      <!-- end container --> 
+    </div>
+    <!-- end bottom-bar --> 
+  </footer>
+  <!-- end footer --> 
+</main>
+
+<!-- JS FILES --> 
+<script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script> 
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script> 
+<script src="{{ url_for('static', filename='js/swiper.min.js') }}"></script> 
+<script src="{{ url_for('static', filename='js/fancybox.min.js') }}"></script> 
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/manage.js') }}"></script>
+<script>var addMovieUrl = "{{ url_for('add_movie') }}";</script>
+<script>var addMovieExcel = "{{ url_for('upload_movie_from_excel') }}";</script>
+<script>
+  window.onload = function() {
+      var activeTab = "{{ active_tab }}";
+      var tabElement = document.getElementById(activeTab);
+      if (tabElement) {
+          // 显示活动标签对应的 div
+          tabElement.style.display = "block";
+      }
+      // 可能还需要代码来突出显示活动标签导航项
+  };
+</script>
+
+
+
+</body>
+</html>
